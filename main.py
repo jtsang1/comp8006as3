@@ -24,6 +24,8 @@ def blockIP(ip_addr):
 def unblockIP(ip_addr):
 	os.system("iptables -D INPUT -s " + ip_addr + " -j DROP")
 
+def main():
+
 # Read config file for current line
 	# If log file size has decreased, reset curline to 1
 curline = 100
@@ -62,5 +64,5 @@ for line in new_attempts:
 # Replace current_blocked with current_summary
 
 
-
+main()
 
