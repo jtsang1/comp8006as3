@@ -18,6 +18,12 @@ Notes:	An IPS monitoring /var/log/secure for failed ssh attempts and block users
 
 import os
 
+def blockIP(ip_addr):
+	os.system("iptables -A INPUT -s " + ip_addr + " -j DROP")
+	
+def unblockIP(ip_addr):
+	os.system("iptables -D INPUT -s " + ip_addr + " -j DROP")
+
 curline = 100
 
 # Get list of failed connections in "Month Date HH:MM:SS IP" format
