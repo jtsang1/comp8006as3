@@ -5,5 +5,8 @@
 # Date:		March 10, 2014
 
 import os
+#import subprocess
 
-os.system("cat /var/log/secure | grep 'Failed' | awk -F' ' '{print $11}'")
+output = os.popen("cat /var/log/secure | grep -a 'Failed' | awk -F' ' '{print $1,$2,$3,$11;}'").read()
+print("what\n", output, sep='')
+
