@@ -18,6 +18,12 @@ Notes:		An IPS monitoring /var/log/secure for failed ssh attempts and block user
 
 import os
 
+def blockIP(ip_addr):
+	os.system("iptables -A INPUT -s " + ip_addr + " -j DROP")
+	
+def unblockIP(ip_addr):
+	os.system("iptables -D INPUT -s " + ip_addr + " -j DROP")
+
 # Read config file for current line
 	# If log file size has decreased, reset curline to 1
 curline = 100
