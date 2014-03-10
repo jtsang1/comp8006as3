@@ -4,11 +4,11 @@ Authors:	Kevin Eng, Jeremy Tsang
 Purpose:	COMP 8006 Assignment 3
 Date:		March 10, 2014
 
-Notes:	An IPS monitoring /var/log/secure for failed ssh attempts and block users who reach
-	a configurable limit of failed attempts. The user is blocked by their IP address
-	using Linux Iptables for a configurable amount of time. This program keeps track of
-	a set of files to hold it's current data since it was designed to be run by Linux
-	Crontab shown below:
+Notes:		An IPS monitoring /var/log/secure for failed ssh attempts and block users who reach
+		a configurable limit of failed attempts. The user is blocked by their IP address
+		using Linux Iptables for a configurable amount of time. This program keeps track of
+		a set of files to hold it's current data since it was designed to be run by Linux
+		Crontab shown below:
 
 		1 ./current_attempts	A list of all current failed attempts (old entries are removed)
 		2 ./current_blocked	A list of IP's currently blocked by Iptables
@@ -18,6 +18,8 @@ Notes:	An IPS monitoring /var/log/secure for failed ssh attempts and block users
 
 import os
 
+# Read config file for current line
+	# If log file size has decreased, reset curline to 1
 curline = 100
 
 # Get list of failed connections in "Month Date HH:MM:SS IP" format
