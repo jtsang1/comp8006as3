@@ -27,22 +27,23 @@ TODO		-cleanup code and comment
 '''*****************************************************************************
 Configuration
 *****************************************************************************'''
+import os
+filepath = os.path.dirname(os.path.realpath(__file__))
 logfile = "/var/log/secure"	# Log file to monitor
 max_attempts = 3		# Max attempts before blocking
-expiry_time = 60		# Time (seconds) before failed attempts expire
+expiry_time = 30		# Time (seconds) before failed attempts expire
 
 # Internal files used (must exist)
-path_current_attempts = "./current_attempts"
-path_current_blocked = "./current_blocked"
-path_ips_log = "./ips_log"
-path_ips_config = "./ips_config"
+path_current_attempts = filepath + "/current_attempts"
+path_current_blocked = filepath + "/current_blocked"
+path_ips_log = filepath + "/ips_log"
+path_ips_config = filepath + "/ips_config"
 
 
 '''*****************************************************************************
 Functions
 *****************************************************************************'''
 # Imports
-import os
 import time
 import datetime
 import calendar
@@ -139,7 +140,7 @@ for line in raw_old_attempts:
 	words = line.split(",")
 	
 	# If invalid line (last line) then break
-	if len(words) != 2:
+	if len(words) != 3:
 		continue
 		
 	old_attempts.append([words[0],words[1],words[2]])
