@@ -79,9 +79,9 @@ for line in current_attempts:
 	print(line)
 
 # Compare current_summary with current_blocked
-for line in current_summary:
+#for line in current_summary:
 	# If in current_summary but not in current_blocked
-	if(line[1] >= 
+	#if(line[1] >= 
 		# Block this IP
 		# Log this block
 	# If in current_summary and in current_blocked
@@ -91,6 +91,3 @@ for line in current_summary:
 		# Log this unblock
 	
 # Replace current_blocked with current_summary
-
-
-
