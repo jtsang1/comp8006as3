@@ -29,7 +29,7 @@ Configuration
 *****************************************************************************'''
 logfile = "/var/log/secure"	# Log file to monitor
 max_attempts = 3		# Max attempts before blocking
-expiry_time = 60 * 60 * 24 * 4  # Time before failed attempts expire
+expiry_time = 60		# Time (seconds) before failed attempts expire
 
 # Internal files used (must exist)
 path_current_attempts = "./current_attempts"
@@ -87,6 +87,7 @@ file_ips_config = open(path_ips_config,"r")
 ips_config = file_ips_config.read().split("\n")
 curline = 1
 cursize = 0
+logfile_changed = 0
 
 for line in ips_config:
 	words = line.split("=")
@@ -99,9 +100,26 @@ for line in ips_config:
 logfile_stat = os.stat(logfile)
 if logfile_stat.st_size < cursize:
 	curline = 1
+	logfile_changed = 1
 
 # Get list of failed connections in "Month Date HH:MM:SS IP" format
-new_attempts = os.popen("sed -n '%d,$p' %s | grep -a 'Failed' | awk -F' ' '{print $1,$2,$3,$11;}'" % (curline, logfile)).read().split("\n")
+raw_new_attempts = os.popen("sed -n '%d,$p' %s | grep -a 'Failed password for' | awk -F' ' '{print $1,$2,$3,$11;}'" % (curline, logfile)).read().split("\n")
+
+# Parse datetime to unix timestamp
+new_attempts = []
+current_year = time.strftime("%Y")
+for line in raw_new_attempts:
+	words = line.split(" ")
+
+	# If invalid line (last line) then break
+	if len(words) != 4:
+		continue
+	
+	# Convert string time to timestamp
+	stringtime = words[0] + ' ' + words[1] + ' ' + words[2] + ' ' + current_year
+	#timestamp = time.strptime(stringtime, "%b %d %H:%M:%S %Y")
+	timestamp = calendar.timegm(time.strptime(stringtime, "%b %d %H:%M:%S %Y"))
+	new_attempts.append([timestamp,words[3],stringtime])
 
 # Update current line
 curline = sum(1 for line in open(logfile))
@@ -113,38 +131,51 @@ file_ips_config.write("current_line=%d\n" % curline)
 file_ips_config.write("logfile_size=%d\n" % cursize)
 file_ips_config.close()
 
-# Append new_attempts to current_attempts
+# Append new_attempts to current_attempts (or replace if logfile is being read from beginning)
 file_current_attempts = open(path_current_attempts,"r")
+raw_old_attempts = file_current_attempts.read().split("\n")
+old_attempts = []
+for line in raw_old_attempts:
+	words = line.split(",")
+	
+	# If invalid line (last line) then break
+	if len(words) != 2:
+		continue
+		
+	old_attempts.append([words[0],words[1],words[2]])
+
+if logfile_changed == 0:
+	current_attempts = old_attempts + new_attempts
+else:
+	current_attempts = new_attempts
 
 # Loop through current_attempts and remove expired entries (Expiry set by user)
 # Build current_summary of current_attempts
-current_year = time.strftime("%Y")
-current_timestamp = time.time()
-current_attempts = []
-for line in new_attempts:
-	words = line.split(" ")
-		
-	# If invalid line (last line) then break
-	if len(words) != 4:
-		break
-	
-	# Convert string time to timestamp
-	stringtime = words[0] + ' ' + words[1] + ' ' + words[2] + ' ' + current_year
-	#timestamp = time.strptime(stringtime, "%b %d %H:%M:%S %Y")
-	timestamp = calendar.timegm(time.strptime(stringtime, "%b %d %H:%M:%S %Y"))
+# current_timestamp = time.time() 	# This gives UTC/GMT only
+dt = datetime.datetime.now()		#This gives localtime
+current_timestamp = calendar.timegm(dt.timetuple())
 
+current_new_attempts = []
+for line in current_attempts:
+	timestamp = int(line[0])
 	# If entry is expired, continue
-	if current_timestamp > timestamp + expiry_time:
+	if current_timestamp > (timestamp + expiry_time):
+		#print("expired by %d" % (current_timestamp - timestamp + expiry_time))
 		continue
 	else:
-		# Add to current_attempts
-		current_attempts.append([timestamp,words[3]])	
+		# Add to current_new_attempts
+		#print([timestamp,line[1]])
+		current_new_attempts.append([timestamp,line[1],line[2]])	
 		# Account in current_summary
-		current_summary_add(words[3])
+		current_summary_add(line[1])
 
-print("current attempts:")
-for line in current_attempts:
-	print(line)
+# Update current_attempts
+file_current_attempts.close()
+file_current_attempts = open(path_current_attempts,"w")
+for line in current_new_attempts:
+	file_current_attempts.write(str(line[0])+","+line[1]+","+line[2]+"\n")
+	#print(line)
+file_current_attempts.close()
 
 # Open current_blocked
 file_current_blocked = open(path_current_blocked, "r")
