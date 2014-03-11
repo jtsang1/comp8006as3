@@ -18,6 +18,9 @@ Notes:		An IPS monitoring /var/log/secure for failed ssh attempts and
 		2 ./current_blocked	A list of IP's currently blocked by Iptables
 		3 ./ips_log		A log of every block/unblock action by this IPS
 		4 ./ips_config		Variables used to keep track of this IPS
+		
+TODO		-cleanup code and comment
+		-use current_attempts
 '''
 
 
