@@ -17,12 +17,23 @@ Notes:		An IPS monitoring /var/log/secure for failed ssh attempts and block user
 '''
 
 import os
+import time
+import calendar
 
-def blockIP(ip_addr):
-	os.system("iptables -A INPUT -s " + ip_addr + " -j DROP")
+# Globals
+current_summary = []
+
+# Add attempt to current_summary
+def current_summary_add(ip_address):
+	found = 0
+	for line in current_summary:
+		if line[0] == ip_address:
+			line[1] += 1
+			found = 1
+			break
 	
-def unblockIP(ip_addr):
-	os.system("iptables -D INPUT -s " + ip_addr + " -j DROP")
+	if not found:
+		current_summary.append([ip_address,1])
 
 # Read config file for current line
 	# If log file size has decreased, reset curline to 1
@@ -34,23 +45,43 @@ new_attempts = os.popen("sed -n '%d,$p' /var/log/secure-20140310 | grep -a 'Fail
 # Append new_attempts to current_attempts
 
 # Loop through current_attempts and remove expired entries (Expiry set by user)
+# Build current_summary of current_attempts
+current_year = time.strftime("%Y")
+current_timestamp = time.time()
+expiry_time = 60 * 60 * 24 * 4
+current_attempts = []
 for line in new_attempts:
 	words = line.split(" ")
-	
+		
 	# If invalid line (last line) then break
 	if len(words) != 4:
 		break
+	
+	# Convert string time to timestamp
+	stringtime = words[0] + ' ' + words[1] + ' ' + words[2] + ' ' + current_year
+	#print(stringtime)
+	#timestamp = time.strptime(stringtime, "%b %d %H:%M:%S %Y")
+	timestamp = calendar.timegm(time.strptime(stringtime, "%b %d %H:%M:%S %Y"))
+	print(timestamp)
 
-	print(words[3])
+	# If entry is expired, continue
+	if current_timestamp > timestamp + expiry_time:
+		continue
+	else:
+		# Else add to current_attempts
+		current_attempts.append([timestamp,words[3]])	
+		# Account in current_summary
+		current_summary_add(words[3])
+		#print(words[3])
 	#print(line)
 
-
-
-# Build current_summary of current_attempts
-
+for line in current_attempts:
+	print(line)
 
 # Compare current_summary with current_blocked
+for line in current_summary:
 	# If in current_summary but not in current_blocked
+	if(line[1] >= 
 		# Block this IP
 		# Log this block
 	# If in current_summary and in current_blocked
@@ -60,7 +91,6 @@ for line in new_attempts:
 		# Log this unblock
 	
 # Replace current_blocked with current_summary
-
 
 
 
