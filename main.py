@@ -35,6 +35,8 @@ def current_summary_add(ip_address):
 	if not found:
 		current_summary.append([ip_address,1])
 
+def main():
+
 # Read config file for current line
 	# If log file size has decreased, reset curline to 1
 curline = 100
