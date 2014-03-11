@@ -35,6 +35,14 @@ def current_summary_add(ip_address):
 	if not found:
 		current_summary.append([ip_address,1])
 
+# Block IP and add log entry
+def blockIP(ip_addr):
+	os.system("iptables -A INPUT -s " + ip_addr + " -j DROP")
+
+# Unblock IP and add log entry
+def unblockIP(ip_addr):
+	os.system("iptables -D INPUT -s " + ip_addr + " -j DROP")
+
 def main():
 
 # Read config file for current line
