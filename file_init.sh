@@ -1,6 +1,6 @@
 #!/bin/bash
 
-touch ./ips_log
-touch ./ips_config
-touch ./current_blocked
-touch ./current_attempts
+touch /root/Documents/ips_ssh/ips_log
+touch /root/Documents/ips_ssh/ips_config
+touch /root/Documents/ips_ssh/current_blocked
+touch /root/Documents/ips_ssh/current_attempts
