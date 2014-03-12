@@ -27,11 +27,12 @@ TODO		-cleanup code and comment
 '''*****************************************************************************
 Configuration
 *****************************************************************************'''
+logfile = "/var/log/secure"	# Log file to monitor (must be in same format as /var/log/secure
+max_attempts = 3		# Max attempts before blocking
+expiry_time = 60		# Time (seconds) before failed attempts expire
+
 import os
 filepath = os.path.dirname(os.path.realpath(__file__))
-logfile = "/var/log/secure"	# Log file to monitor
-max_attempts = 3		# Max attempts before blocking
-expiry_time = 30		# Time (seconds) before failed attempts expire
 
 # Internal files used (must exist)
 path_current_attempts = filepath + "/current_attempts"
